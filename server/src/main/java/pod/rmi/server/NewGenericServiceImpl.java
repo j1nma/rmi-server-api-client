@@ -4,7 +4,10 @@ import pod.rmi.GenericService;
 import pod.rmi.User;
 import pod.rmi.UserAvailableCallbackHandler;
 
+import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
+import java.rmi.activation.Activatable;
+import java.rmi.activation.ActivationID;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,7 +20,9 @@ public class NewGenericServiceImpl implements GenericService {
 	private final Queue<User> users;
 	private final Queue<UserAvailableCallbackHandler> handlers;
 	
-	public NewGenericServiceImpl() {
+	public NewGenericServiceImpl(ActivationID id, MarshalledObject data) throws RemoteException {
+		Activatable.exportObject(this, id, 0);
+		
 		this.visits = 0;
 		this.services = new LinkedList<>();
 		this.users = new LinkedList<>();
