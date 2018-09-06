@@ -1,15 +1,16 @@
 package pod.rmi.server;
 
+import org.slf4j.LoggerFactory;
 import pod.rmi.GenericService;
 import pod.rmi.User;
 import pod.rmi.UserAvailableCallbackHandler;
 
+import java.io.*;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.rmi.activation.Activatable;
 import java.rmi.activation.ActivationID;
 import java.util.LinkedList;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 
@@ -20,13 +21,27 @@ public class NewGenericServiceImpl implements GenericService {
 	private final Queue<User> users;
 	private final Queue<UserAvailableCallbackHandler> handlers;
 	
-	public NewGenericServiceImpl(ActivationID id, MarshalledObject data) throws RemoteException {
+	private File storage;
+	private static org.slf4j.Logger logger = LoggerFactory.getLogger(NewGenericServiceImpl.class);
+	
+	public NewGenericServiceImpl(ActivationID id, MarshalledObject data) throws IOException, ClassNotFoundException {
 		Activatable.exportObject(this, id, 0);
 		
 		this.visits = 0;
 		this.services = new LinkedList<>();
 		this.users = new LinkedList<>();
 		this.handlers = new LinkedList<>();
+		
+		if (data != null) {
+			storage = (File) data.get(); // Ej: storage es de tipo File
+			if (storage.exists()) {
+				System.out.println("Storage exists!");
+				read(); // recuperar el estado interno
+			} else {
+				logger.info("No habia store lo genero...");
+				store();
+			}
+		}
 	}
 	
 	@Override
@@ -45,7 +60,9 @@ public class NewGenericServiceImpl implements GenericService {
 		
 		synchronized (this) {
 			this.visits++;
+			store();
 		}
+		
 		
 	}
 	
@@ -88,7 +105,7 @@ public class NewGenericServiceImpl implements GenericService {
 		
 		UserAvailableCallbackHandler handler = handlers.poll();
 		
-		if(handler != null) {
+		if (handler != null) {
 			handler.userAvailable(user);
 		}
 		
@@ -104,5 +121,31 @@ public class NewGenericServiceImpl implements GenericService {
 		}
 		
 	}
+	
+	private void read() {
+		if (storage != null) {
+			logger.info("Leyendo del storage");
+			try (ObjectInputStream ois = new ObjectInputStream(new
+					FileInputStream(storage))) {
+				visits = ois.readInt();
+			} catch (final IOException e) {
+				logger.error("error al leer el storage", e);
+			}
+		}
+	}
+	
+	private void store() {
+		if (storage != null) {
+			logger.info("Guardando en el storage");
+			try (ObjectOutputStream oos = new ObjectOutputStream(new
+					FileOutputStream(storage))) {
+				oos.writeInt(visits);
+				oos.flush();
+			} catch (final IOException e) {
+				logger.error("error al escribir el storage", e);
+			}
+		}
+	}
+	
 	
 }

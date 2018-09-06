@@ -25,16 +25,24 @@ public class Client {
 		
 		// Instantiate handler
 		UserAvailableCallbackHandler handler = new ClientUserAvailableCallbackHandler();
-
+		
 		// Export handler
 		final Remote remote = UnicastRemoteObject.exportObject(handler, 0);
 		
-		for (int i = 0; i < 4; i++) {
-			service.addToUserQueue(new UserExtended(new Integer(i).toString(), "name_" + i, i * i, i * i * i));
+		
+		for (int i = 0; i < 3; i++) {
+			service.addVisit();
 		}
 		
-		while (!service.isUserQueueEmpty()) {
-			service.getFirstInUserQueue(handler);
-		}
+		System.out.println(service.getVisitCount());
+
+
+//		for (int i = 0; i < 4; i++) {
+//			service.addToUserQueue(new UserExtended(new Integer(i).toString(), "name_" + i, i * i, i * i * i));
+//		}
+//
+//		while (!service.isUserQueueEmpty()) {
+//			service.getFirstInUserQueue(handler);
+//		}
 	}
 }

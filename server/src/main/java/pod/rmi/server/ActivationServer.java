@@ -1,5 +1,8 @@
 package pod.rmi.server;
 
+import java.io.File;
+import java.io.IOException;
+import java.rmi.MarshalledObject;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.activation.Activatable;
@@ -22,7 +25,8 @@ public class ActivationServer {
 	private static final String CODEBASE_PATH = "file:///Users/JuanmaAlonso/ITBA/POD/TP_3_RMI/server-api-client/sac/server/target/classes";
 	private static final String POLICY_PATH = "file:///Users/JuanmaAlonso/ITBA/POD/TP_3_RMI/server-api-client/sac/server/target/sac-server-1.0-SNAPSHOT/java.policy";
 	
-	public static void main(final String[] args) throws RemoteException, ActivationException {
+	
+	public static void main(final String[] args) throws IOException, ActivationException {
 		logger.info("rmi activation Server Starting ...");
 		
 		// 1) instalar un SecurityManager porque hay que levantar un JVM, etc.
@@ -38,8 +42,13 @@ public class ActivationServer {
 		// 3) generar un ActivationDesc con la info de creacion para el objeto
 		// remoto ActivationGroupID que lo manejara, nombre de la clase y
 		// codebase(classpath)
-		final ActivationDesc servantDescription = new ActivationDesc(activationGroupID, SERVANT_CLASS,
-				CODEBASE_PATH, null);
+//		final ActivationDesc servantDescription = new ActivationDesc(activationGroupID, SERVANT_CLASS,
+//				CODEBASE_PATH, null);
+		
+		final ActivationDesc servantDescription = new
+				ActivationDesc(activationGroupID, SERVANT_CLASS,
+				CODEBASE_PATH, new MarshalledObject(new
+				File("/tmp/objectStore.ser")));
 		
 		// 4) dicho ActivationDesc del servant se lo debe pasar a la unica
 		// instancia Activator del RMID que está levantado para que cuando este
